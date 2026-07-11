@@ -6,11 +6,11 @@ La aplicación combina un backend FastAPI, una base SQLite persistente, un sched
 
 ## Requisito Previo: Suscripción a CoinScanX
 
-> **Importante:** Para usar SignalFaru necesitás una cuenta con suscripción activa en **[https://coinscanx.com/](https://coinscanx.com/)**.
+> **Importante:** Para usar SignalFaru necesitás una cuenta con suscripción activa en **[https://coinscanx.com/?ref=JNCFB3](https://coinscanx.com/?ref=JNCFB3)**.
 >
 > Las señales (Top 10 y Período de gracia) provienen de la API de CoinScanX. Sin una suscripción vigente y su `COINSCANX_API_KEY` correspondiente, la app no puede obtener señales y las funciones principales no operan.
 >
-> Registrate y suscribite en [https://coinscanx.com/](https://coinscanx.com/), obtené tu API key y cargala en la variable de entorno `COINSCANX_API_KEY` (ver [Variables de Entorno](#variables-de-entorno)).
+> Registrate y suscribite con este enlace de invitación 👉 [https://coinscanx.com/?ref=JNCFB3](https://coinscanx.com/?ref=JNCFB3), obtené tu API key y cargala en la variable de entorno `COINSCANX_API_KEY` (ver [Variables de Entorno](#variables-de-entorno)).
 
 ## Qué Hace
 
