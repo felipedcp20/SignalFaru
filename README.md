@@ -35,7 +35,7 @@ La aplicación combina un backend FastAPI, una base SQLite persistente, un sched
 
 ### Login
 
-![Pantalla de login de SignalFaru](assets/Login.png)
+<img src="assets/Login.png" alt="Pantalla de login de SignalFaru" width="320" />
 
 ## Stack
 
