@@ -31,6 +31,12 @@ La aplicación combina un backend FastAPI, una base SQLite persistente, un sched
 - Obtiene y cachea metadata social desde CoinGecko: Website, X, Telegram, Reddit, GitHub, whitepaper y CoinGecko.
 - Tiene autenticación con JWT y cambio de contraseña desde el panel.
 
+## Capturas
+
+### Login
+
+![Pantalla de login de SignalFaru](assets/Login.png)
+
 ## Stack
 
 ### Backend
