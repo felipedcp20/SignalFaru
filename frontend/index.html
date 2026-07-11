@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#080A0F"/>
+  <title>SignalFaru</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/styles.css"/>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LOGIN SCREEN — shown when not authenticated
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-bg"></div>
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 36 36" fill="none">
+          <polygon points="18,2 34,11 34,25 18,34 2,25 2,11" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M18 9v18M11 13l7 5 7-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1 class="login-title">SignalFaru</h1>
+      <p class="login-sub">Panel de Trading · Acceso seguro</p>
+
+      <form id="login-form" autocomplete="on">
+        <div class="login-field">
+          <label for="login-username">Usuario</label>
+          <input type="text" id="login-username" name="username" autocomplete="username" placeholder="admin" required/>
+        </div>
+        <div class="login-field">
+          <label for="login-password">Contraseña</label>
+          <div class="login-pass-wrap">
+            <input type="password" id="login-password" name="password" autocomplete="current-password" placeholder="••••••••" required/>
+            <button type="button" class="login-eye" id="toggle-pass" aria-label="Mostrar contraseña">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.4"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.4"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="login-error" hidden></div>
+        <button type="submit" class="login-btn" id="login-submit">
+          <span>Entrar</span>
+          <svg viewBox="0 0 18 18" fill="none"><path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </form>
+
+      <div class="login-footer">Credenciales por defecto: <code>admin / admin</code></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN APP — hidden until authenticated
+       ═══════════════════════════════════════════════════════════ -->
+  <div id="app" hidden>
+
+    <!-- DEMO BANNER -->
+    <div class="demo-banner" id="demo-banner" hidden>
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2L2 14h12L8 2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6v4M8 11.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      Modo Demo — datos simulados, ninguna operación es real
+    </div>
+
+    <!-- NAVBAR -->
+    <header class="navbar" id="navbar">
+      <div class="navbar__brand">
+        <div class="navbar__logo">
+          <svg viewBox="0 0 28 28" fill="none"><polygon points="14,2 26,9 26,19 14,26 2,19 2,9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 8v12M9 11l5 3 5-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <span class="navbar__name">SignalFaru</span>
+      </div>
+
+      <nav class="navbar__tabs" role="tablist">
+        <button class="nav-tab is-active" data-page="dashboard" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-tab" data-page="signals" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><polyline points="2,14 6,9 10,12 14,5 18,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Señales
+        </button>
+        <button class="nav-tab" data-page="trade" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Operar
+        </button>
+        <button class="nav-tab" data-page="orders" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M4 5h12M4 10h8M4 15h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Órdenes
+        </button>
+        <button class="nav-tab" data-page="portfolio" role="tab">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1 0 14 0 7 7 0 0 0-14 0z" stroke="currentColor" stroke-width="1.4"/><path d="M10 3v7l4 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Portafolio
+        </button>
+      </nav>
+
+      <div class="navbar__right">
+        <div class="live-pill">
+          <span class="live-dot"></span>
+          <span id="btc-nav" class="live-btc">BTC —</span>
+        </div>
+        <div class="refresh-ring" id="refresh-ring" title="Próxima actualización">
+          <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" class="ring-track"/><circle cx="16" cy="16" r="13" class="ring-progress" id="ring-progress"/></svg>
+          <span class="refresh-ring__label" id="ring-label">—</span>
+        </div>
+        <button class="user-btn" data-page="admin" title="Administración">
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          <span id="nav-username">admin</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGES -->
+    <main class="pages">
+
+      <!-- DASHBOARD -->
+      <section class="page is-active" id="page-dashboard">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">Bienvenido de nuevo</p>
+              <h1 class="page-title">Dashboard</h1>
+            </div>
+            <div class="last-update">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M13.5 8A5.5 5.5 0 1 1 8 2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 2.5V5M13.5 3v2.5H11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="last-update-time">—</span>
+            </div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card stat-card--hero">
+              <div class="stat-card__label">Bitcoin · BTC/USDT</div>
+              <div class="stat-card__value" id="dash-btc">—</div>
+              <div class="stat-card__sub">
+                <span class="live-dot"></span> Precio en vivo
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__label">USDT · Spot</div>
+              <div class="stat-card__value" id="dash-usdt">—</div>
+              <div class="stat-card__sub" id="dash-usdt-sub">Disponible para operar</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__label">Señales activas</div>
+              <div class="stat-card__value" id="dash-signals">—</div>
+              <div class="stat-card__sub">Top 10 CoinScanX</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__label">Órdenes abiertas</div>
+              <div class="stat-card__value" id="dash-orders">—</div>
+              <div class="stat-card__sub">En Binance Spot</div>
+            </div>
+          </div>
+
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Top señales ahora</p>
+              <h2 class="section-title">Mejores oportunidades</h2>
+            </div>
+            <button class="btn-link" data-page="signals">Ver todas →</button>
+          </div>
+          <div class="preview-grid" id="dash-preview">
+            <div class="preview-skeleton"></div>
+            <div class="preview-skeleton"></div>
+            <div class="preview-skeleton"></div>
+          </div>
+
+          <div class="section-head" style="margin-top:40px">
+            <div>
+              <p class="section-kicker">Período de gracia</p>
+              <h2 class="section-title">Salieron recientemente del top</h2>
+            </div>
+            <button class="btn-link" data-page="signals">Ver todas →</button>
+          </div>
+          <div class="preview-grid" id="dash-gracia-preview">
+            <div class="preview-skeleton"></div>
+            <div class="preview-skeleton"></div>
+            <div class="preview-skeleton"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÑALES -->
+      <section class="page" id="page-signals">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">CoinScanX · Tiempo real</p>
+              <h1 class="page-title">Señales del mercado</h1>
+            </div>
+            <div class="signals-refresh">
+              <button class="btn-icon" id="force-refresh" title="Actualizar ahora">
+                <svg viewBox="0 0 18 18" fill="none"><path d="M15 9A6 6 0 1 1 9 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 3V6.5M15 2v3.5H11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <span class="refresh-countdown">Actualiz. en <strong id="signals-cd-secs">—</strong>s</span>
+            </div>
+          </div>
+
+          <div class="signal-tabs">
+            <button class="signal-tab is-active" data-stab="top10">Top 10 <span class="tab-badge" id="tab-top10-count">—</span></button>
+            <button class="signal-tab" data-stab="gracia">Período de gracia <span class="tab-badge" id="tab-gracia-count">—</span></button>
+          </div>
+          <div class="data-attribution">
+            Social data by <a href="https://www.coingecko.com/en/api" target="_blank" rel="noopener noreferrer">CoinGecko</a>
+          </div>
+
+          <div id="signals-list" class="signals-list">
+            <div class="skeleton-list">
+              <div class="signal-skeleton"></div>
+              <div class="signal-skeleton"></div>
+              <div class="signal-skeleton"></div>
+              <div class="signal-skeleton"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPERAR -->
+      <section class="page" id="page-trade">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">Binance · Spot</p>
+              <h1 class="page-title">Operar</h1>
+            </div>
+          </div>
+
+          <div class="trade-empty" id="trade-empty">
+            <div class="trade-empty__icon">
+              <svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.4"/><path d="M16 28l5-5 4 4 7-9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h2>Selecciona una moneda</h2>
+            <p>Ve a <strong>Señales</strong>, elige una oportunidad y presiona "Operar".</p>
+            <button class="btn-primary" data-page="signals">Ir a Señales</button>
+          </div>
+
+          <div class="trade-layout" id="trade-layout" hidden>
+            <div class="trade-main">
+              <!-- Coin header -->
+              <div class="trade-coin-header">
+                <div class="coin-avatar-lg" id="trade-avatar">
+                  <img id="trade-logo" src="" alt="" onerror="this.style.display='none';document.getElementById('trade-logo-fb').style.display='flex'"/>
+                  <div id="trade-logo-fb" class="coin-fallback-lg" style="display:none"></div>
+                </div>
+                <div class="trade-coin-info">
+                  <div class="trade-symbol" id="trade-symbol">—</div>
+                  <div class="trade-name" id="trade-name">—</div>
+                </div>
+                <div class="trade-price-block">
+                  <div class="trade-price" id="trade-price">—</div>
+                  <div class="trade-change" id="trade-change">—</div>
+                </div>
+              </div>
+
+              <!-- Binance availability badge -->
+              <div class="trade-availability" id="trade-avail"></div>
+              <div class="trade-socials" id="trade-socials"></div>
+
+              <!-- Mini stats -->
+              <div class="trade-stats">
+                <div class="tstat">
+                  <div class="tstat__label">Precio entrada</div>
+                  <div class="tstat__value" id="tstat-initial">—</div>
+                </div>
+                <div class="tstat">
+                  <div class="tstat__label">Máximo</div>
+                  <div class="tstat__value" id="tstat-max">—</div>
+                </div>
+                <div class="tstat">
+                  <div class="tstat__label">Volumen 24h</div>
+                  <div class="tstat__value" id="tstat-vol">—</div>
+                </div>
+                <div class="tstat">
+                  <div class="tstat__label">Tiempo en top</div>
+                  <div class="tstat__value" id="tstat-since">—</div>
+                </div>
+              </div>
+
+              <!-- Chart 1: Precio en USD -->
+              <div class="chart-card" id="chart-card">
+                <div class="chart-card__head">
+                  <span class="chart-card__title">Precio USD</span>
+                  <span class="chart-card__sub" id="chart-sub">Cargando…</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="price-chart"></canvas>
+                </div>
+                <div class="chart-empty" id="chart-empty" hidden>
+                  Sin suficientes datos históricos aún. El scheduler recopila datos cada 1 min.
+                </div>
+              </div>
+
+              <!-- Chart 2: % de aumento desde entrada (CoinScanX) -->
+              <div class="chart-card" id="pct-chart-card">
+                <div class="chart-card__head">
+                  <span class="chart-card__title">% desde entrada · CoinScanX</span>
+                  <span class="chart-card__sub" id="pct-chart-sub">Cargando…</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="pct-chart"></canvas>
+                </div>
+                <div class="chart-empty" id="pct-chart-empty" hidden>
+                  Sin historial de % disponible aún.
+                </div>
+              </div>
+
+              <!-- Chart 3: Posición en Top 10 -->
+              <div class="chart-card" id="rank-chart-card">
+                <div class="chart-card__head">
+                  <span class="chart-card__title">Posición en ranking Top 10</span>
+                  <span class="chart-card__sub" id="rank-chart-sub">Cargando…</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="rank-chart"></canvas>
+                </div>
+                <div class="chart-empty" id="rank-chart-empty" hidden>
+                  Sin historial de ranking. Solo disponible para monedas del Top 10.
+                </div>
+              </div>
+
+              <!-- Formulario de orden -->
+              <div class="oco-form" id="oco-form">
+                <div class="oco-form__top">
+                  <div class="form-eyebrow" id="form-eyebrow">Orden · Binance Spot</div>
+                  <div class="side-switch">
+                    <button class="side-btn is-active" data-side="BUY">Comprar</button>
+                    <button class="side-btn" data-side="SELL">Vender</button>
+                  </div>
+                </div>
+
+                <div class="invest-card">
+                  <div class="invest-card__top">
+                    <span id="invest-card-label">Cantidad a invertir (USDT)</span>
+                    <span class="invest-card__avail">Disponible: <strong id="invest-avail">—</strong></span>
+                  </div>
+
+                  <div class="range-wrap">
+                    <input type="range" min="0" max="100" value="0" step="1" id="invest-slider"/>
+                    <div class="range-labels">
+                      <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                    </div>
+                  </div>
+
+                  <div class="pct-btns">
+                    <button data-pct="25">25%</button>
+                    <button data-pct="50">50%</button>
+                    <button data-pct="75">75%</button>
+                    <button data-pct="100">MAX</button>
+                  </div>
+
+                  <div class="invest-preview">
+                    <div class="invest-preview__col">
+                      <div class="invest-preview__label">Monto USDT</div>
+                      <div class="invest-preview__val" id="invest-usdt">0.00</div>
+                    </div>
+                    <div class="invest-preview__arrow">⟶</div>
+                    <div class="invest-preview__col">
+                      <div class="invest-preview__label">Cantidad</div>
+                      <div class="invest-preview__val" id="invest-qty">0</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sección BUY: precio límite -->
+                <div id="buy-limit-section">
+                  <div class="pct-price-row">
+                    <div class="pct-price-card gain-card" style="grid-column: 1 / -1">
+                      <div class="pct-price-card__label">
+                        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13V3M3 8l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Precio límite de compra
+                      </div>
+                      <div class="pct-price-card__input-row">
+                        <input type="number" id="f-limit-price" min="0.000001" step="any" value="0"/>
+                        <span class="pct-price-card__unit">USDT</span>
+                      </div>
+                      <div class="pct-price-card__result" id="f-limit-display" style="color:var(--text2)">Precio actual pre-cargado</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sección SELL: OCO take-profit + stop-loss -->
+                <div id="sell-oco-section" style="display:none">
+                  <div class="pct-price-row">
+                    <!-- Ganancia -->
+                    <div class="pct-price-card gain-card">
+                      <div class="pct-price-card__label">
+                        <svg viewBox="0 0 16 16" fill="none"><path d="M8 13V3M3 8l5-5 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Take profit
+                      </div>
+                      <div class="pct-price-card__input-row">
+                        <input type="number" id="f-gain-pct" min="0.1" max="1000" step="0.1" value="10"/>
+                        <span class="pct-price-card__unit">%</span>
+                      </div>
+                      <div class="pct-price-card__result" id="f-price-display">— USDT</div>
+                    </div>
+                    <!-- Pérdida -->
+                    <div class="pct-price-card loss-card">
+                      <div class="pct-price-card__label">
+                        <svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Stop loss
+                      </div>
+                      <div class="pct-price-card__input-row">
+                        <input type="number" id="f-loss-pct" min="0.1" max="100" step="0.1" value="5"/>
+                        <span class="pct-price-card__unit">%</span>
+                      </div>
+                      <div class="pct-price-card__result" id="f-stop-display">— USDT</div>
+                      <div class="pct-price-card__note">Stop trigger = Stop limit</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-footer">
+                  <div class="form-msg" id="form-msg"></div>
+                  <button class="btn-place" id="btn-place">
+                    <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span id="btn-place-label">Comprar a límite</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right sidebar -->
+            <div class="trade-sidebar">
+              <div class="sidebar-card">
+                <div class="sidebar-card__head">
+                  <span class="sidebar-card__title">Órdenes abiertas</span>
+                  <span class="badge" id="sidebar-orders-count">0</span>
+                </div>
+                <div id="sidebar-orders">
+                  <div class="empty-mini">Sin órdenes en este par.</div>
+                </div>
+              </div>
+              <div class="sidebar-card">
+                <div class="sidebar-card__head">
+                  <span class="sidebar-card__title">Trades & P&L</span>
+                </div>
+                <div id="sidebar-pnl">
+                  <div class="empty-mini">Sin historial de trades.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ÓRDENES -->
+      <section class="page" id="page-orders">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">Binance Spot</p>
+              <h1 class="page-title">Mis órdenes</h1>
+            </div>
+            <button class="btn-icon" id="orders-refresh" title="Actualizar">
+              <svg viewBox="0 0 18 18" fill="none"><path d="M15 9A6 6 0 1 1 9 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 3V6.5M15 2v3.5H11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div class="orders-section-label">Abiertas ahora</div>
+          <div id="all-orders-list">
+            <div class="loading-state">Cargando órdenes…</div>
+          </div>
+
+          <div class="orders-section-label" style="margin-top:36px">
+            Historial por moneda
+            <div class="history-picker">
+              <input type="text" id="history-symbol-input" placeholder="Ej: SNX, BTC…"/>
+              <button class="btn-sm" id="history-search-btn">Buscar</button>
+            </div>
+          </div>
+          <div id="orders-history">
+            <div class="empty-state">Ingresa un símbolo para ver el historial de trades y P&amp;L.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PORTAFOLIO -->
+      <section class="page" id="page-portfolio">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">Binance Spot · Distribución</p>
+              <h1 class="page-title">Portafolio</h1>
+            </div>
+            <button class="btn-icon" id="portfolio-refresh" title="Actualizar portafolio">
+              <svg viewBox="0 0 18 18" fill="none"><path d="M15 9A6 6 0 1 1 9 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 3V6.5M15 2v3.5H11.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+
+          <div class="portfolio-layout" id="portfolio-layout">
+            <!-- Total y gráfica donut -->
+            <div class="portfolio-chart-card">
+              <div class="portfolio-total-label">Valor total estimado</div>
+              <div class="portfolio-total-val" id="portfolio-total">—</div>
+              <div class="portfolio-chart-wrap">
+                <canvas id="portfolio-donut"></canvas>
+                <div class="portfolio-center-label" id="portfolio-center">
+                  <div class="portfolio-center-num" id="portfolio-center-num">—</div>
+                  <div class="portfolio-center-sub">activos</div>
+                </div>
+              </div>
+            </div>
+            <!-- Tabla de activos -->
+            <div class="portfolio-table-card">
+              <div class="portfolio-table-head">
+                <span>Activo</span>
+                <span>Precio</span>
+                <span>Cantidad</span>
+                <span>Valor USDT</span>
+                <span>% del total</span>
+              </div>
+              <div id="portfolio-list">
+                <div class="loading-state">Cargando portafolio…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN PANEL -->
+      <section class="page" id="page-admin">
+        <div class="container">
+          <div class="page-hero">
+            <div>
+              <p class="page-kicker">Sistema · Administración</p>
+              <h1 class="page-title">Panel Admin</h1>
+            </div>
+            <button class="btn-danger" id="logout-btn">
+              <svg viewBox="0 0 18 18" fill="none"><path d="M11 2H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h7M13 12l3-3-3-3M7 9h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Cerrar sesión
+            </button>
+          </div>
+
+          <!-- User info -->
+          <div class="admin-grid">
+            <div class="admin-card">
+              <div class="admin-card__head">
+                <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Usuario actual
+              </div>
+              <div class="admin-user-info">
+                <div class="admin-avatar" id="admin-avatar-letters">A</div>
+                <div>
+                  <div class="admin-username" id="admin-username-display">admin</div>
+                  <div class="admin-role">Administrador · Acceso total</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Change password -->
+            <div class="admin-card">
+              <div class="admin-card__head">
+                <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="9" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 9V6a3 3 0 0 1 6 0v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="14" r="1.5" fill="currentColor"/></svg>
+                Cambiar contraseña
+              </div>
+              <form id="change-pass-form">
+                <div class="admin-field">
+                  <label>Contraseña actual</label>
+                  <input type="password" id="cp-current" autocomplete="current-password" placeholder="Tu contraseña actual"/>
+                </div>
+                <div class="admin-field">
+                  <label>Nueva contraseña</label>
+                  <input type="password" id="cp-new" autocomplete="new-password" placeholder="Mínimo 6 caracteres"/>
+                </div>
+                <div class="admin-field">
+                  <label>Confirmar nueva contraseña</label>
+                  <input type="password" id="cp-confirm" autocomplete="new-password" placeholder="Repite la nueva contraseña"/>
+                </div>
+                <div id="cp-msg" class="form-msg" style="min-height:0;margin-bottom:10px"></div>
+                <button type="submit" class="btn-primary" style="max-width:none">
+                  <svg viewBox="0 0 18 18" fill="none"><path d="M3 9l5 5 7-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Actualizar contraseña
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- App info -->
+          <div class="admin-info-row">
+            <div class="info-chip">
+              <span class="info-chip__label">Versión</span>
+              <span class="info-chip__val">0.4.0</span>
+            </div>
+            <div class="info-chip">
+              <span class="info-chip__label">Scheduler</span>
+              <span class="info-chip__val">Cada 1 min</span>
+            </div>
+            <div class="info-chip">
+              <span class="info-chip__label">DB</span>
+              <span class="info-chip__val">SQLite · Persistente</span>
+            </div>
+            <div class="info-chip">
+              <span class="info-chip__label">API</span>
+              <span class="info-chip__val">Binance Spot</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav class="mobile-nav">
+      <button class="mnav-btn is-active" data-page="dashboard">
+        <svg viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="12" y="2" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="2" y="12" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="12" y="12" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="mnav-btn" data-page="signals">
+        <svg viewBox="0 0 22 22" fill="none"><polyline points="2,16 6,10 10,13 14,5 20,9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Señales</span>
+      </button>
+      <button class="mnav-btn" data-page="trade" id="mnav-trade" disabled>
+        <svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 7v4l3 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Operar</span>
+      </button>
+      <button class="mnav-btn" data-page="orders">
+        <svg viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 11h9M4 16h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Órdenes</span>
+      </button>
+      <button class="mnav-btn" data-page="portfolio">
+        <svg viewBox="0 0 22 22" fill="none"><path d="M3 11a8 8 0 1 0 16 0 8 8 0 0 0-16 0z" stroke="currentColor" stroke-width="1.4"/><path d="M11 4v7l4.5 2.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Cartera</span>
+      </button>
+      <button class="mnav-btn" data-page="admin">
+        <svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="3.5" stroke="currentColor" stroke-width="1.4"/><path d="M4 19c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>Admin</span>
+      </button>
+    </nav>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+  </div><!-- /#app -->
+
+  <script src="/app.js"></script>
+</body>
+</html>
