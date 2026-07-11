@@ -37,6 +37,9 @@ env/
 *.swo
 *~
 
+# Claude Code (config local)
+.claude/settings.local.json
+
 # Database
 *.db
 *.db-journal
