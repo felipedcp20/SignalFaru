@@ -1,10 +1,9 @@
-from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import get_usdt_pairs
-from app.models.signal import SignalSnapshot, SignalSource
+from app.models.signal import SignalSnapshot
 from app.schemas.signals import CoinSignal, SnapshotHistory
 from app.services import coinscanx
 
@@ -19,27 +18,9 @@ def _enrich_with_binance(coins: list[dict]) -> list[dict]:
     return coins
 
 
-def _save_snapshots(db: Session, source: SignalSource, coins: list[dict]) -> None:
-    for coin in coins:
-        snapshot = SignalSnapshot(
-            source=source,
-            symbol=coin["symbol"],
-            name=coin["name"],
-            rank=coin.get("rank"),
-            initial_price_usd=coin["initial_price_usd"],
-            current_price_usd=coin.get("current_price_usd"),
-            max_price_usd=coin["max_price_usd"],
-            max_increase_percentage=coin["max_increase_percentage"],
-            current_increase_percentage=coin.get("current_increase_percentage"),
-            in_top_since=datetime.fromisoformat(coin["in_top_since"]),
-            exit_date=datetime.fromisoformat(coin["exit_date"]) if coin.get("exit_date") else None,
-            in_top=coin["in_top"],
-            volumen24h=coin.get("volumen24h"),
-            last_updated=datetime.fromisoformat(coin["last_updated"]) if coin.get("last_updated") else None,
-            fetched_at=datetime.utcnow(),
-        )
-        db.add(snapshot)
-    db.commit()
+# Nota: los GET de señales no persisten snapshots — de eso se encarga el
+# scheduler (app/scheduler.py) cada minuto. Así los GET son idempotentes y
+# no se duplican filas en signal_snapshots por cada refresh del frontend.
 
 
 @router.get("/top10", response_model=list[CoinSignal])
@@ -47,24 +28,18 @@ def get_top10(
     limit: int = Query(default=10, ge=1, le=10),
     original: bool = Query(default=False),
     sort: str = Query(default="desc", pattern="^(asc|desc)$"),
-    db: Session = Depends(get_db),
 ):
     coins = coinscanx.fetch_top10(limit=limit, original=original, sort=sort)
-    coins = _enrich_with_binance(coins)
-    _save_snapshots(db, SignalSource.top10, coins)
-    return coins
+    return _enrich_with_binance(coins)
 
 
 @router.get("/periodo-gracia", response_model=list[CoinSignal])
 def get_periodo_gracia(
     limit: int = Query(default=10, ge=1, le=200),
     sort: str = Query(default="desc", pattern="^(asc|desc)$"),
-    db: Session = Depends(get_db),
 ):
     coins = coinscanx.fetch_periodo_gracia(limit=limit, sort=sort)
-    coins = _enrich_with_binance(coins)
-    _save_snapshots(db, SignalSource.periodo_gracia, coins)
-    return coins
+    return _enrich_with_binance(coins)
 
 
 @router.get("/history/{symbol}", response_model=list[SnapshotHistory])

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.database import SessionLocal
 from app.models.signal import SignalSnapshot, SignalSource
@@ -49,10 +49,33 @@ def poll_coinscanx() -> None:
         db.close()
 
 
+SNAPSHOT_RETENTION_DAYS = 30
+
+
+def cleanup_old_snapshots() -> None:
+    """Borra snapshots con más de SNAPSHOT_RETENTION_DAYS días para acotar la DB."""
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(days=SNAPSHOT_RETENTION_DAYS)
+        deleted = (
+            db.query(SignalSnapshot)
+            .filter(SignalSnapshot.fetched_at < cutoff)
+            .delete(synchronize_session=False)
+        )
+        db.commit()
+        logger.info("Scheduler: limpieza de snapshots — %d filas eliminadas (> %d días).", deleted, SNAPSHOT_RETENTION_DAYS)
+    except Exception as e:
+        db.rollback()
+        logger.error("Scheduler: error en limpieza de snapshots: %s", e)
+    finally:
+        db.close()
+
+
 def start() -> None:
     scheduler.add_job(poll_coinscanx, "interval", minutes=1, id="poll_coinscanx", replace_existing=True)
+    scheduler.add_job(cleanup_old_snapshots, "cron", hour=3, minute=0, id="cleanup_snapshots", replace_existing=True)
     scheduler.start()
-    logger.info("Scheduler iniciado — polling CoinScanX cada 1 minuto.")
+    logger.info("Scheduler iniciado — polling CoinScanX cada 1 minuto; limpieza diaria de snapshots a las 03:00 UTC.")
 
 
 def stop() -> None:

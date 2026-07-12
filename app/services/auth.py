@@ -4,11 +4,17 @@ from jose import jwt
 from passlib.context import CryptContext
 from app.config import settings
 
-pwd_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
+# bcrypt para hashes nuevos; sha256_crypt se mantiene para verificar hashes
+# existentes y passlib los marca para re-hash (ver needs_rehash + login).
+pwd_context = CryptContext(schemes=["bcrypt", "sha256_crypt"], deprecated=["sha256_crypt"])
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
+
+
+def needs_rehash(hashed: str) -> bool:
+    return pwd_context.needs_update(hashed)
 
 
 def hash_password(plain: str) -> str:

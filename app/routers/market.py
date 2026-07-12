@@ -3,7 +3,7 @@ from binance.client import Client
 from binance.exceptions import BinanceAPIException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.dependencies import get_binance_client
+from app.dependencies import get_binance_client, binance_http_error
 from app.schemas.metadata import MetadataBatchRequest, MetadataBatchResponse
 from app.services import coingecko
 from app.config import settings

@@ -1,3 +1,4 @@
+import time
 from functools import lru_cache
 from typing import Optional
 from fastapi import Depends, Header, HTTPException
@@ -31,14 +32,26 @@ def get_binance_client() -> Client:
     return client
 
 
-@lru_cache(maxsize=1)
+# Cache con TTL: los pares se refrescan cada hora para captar listados/deslistados
+# nuevos de Binance sin reiniciar la app (lru_cache nunca expiraba).
+_PAIRS_TTL_SECONDS = 3600.0
+_pairs_cache: dict = {"pairs": None, "fetched_at": 0.0}
+
+
 def get_usdt_pairs() -> set:
     if settings.demo_mode:
         from app.demo import DEMO_USDT_PAIRS
         return DEMO_USDT_PAIRS
-    client = get_binance_client()
-    info = client.get_exchange_info()
-    return {s["symbol"] for s in info["symbols"] if s["symbol"].endswith("USDT") and s["status"] == "TRADING"}
+    now = time.monotonic()
+    if _pairs_cache["pairs"] is None or now - _pairs_cache["fetched_at"] > _PAIRS_TTL_SECONDS:
+        client = get_binance_client()
+        info = client.get_exchange_info()
+        _pairs_cache["pairs"] = {
+            s["symbol"] for s in info["symbols"]
+            if s["symbol"].endswith("USDT") and s["status"] == "TRADING"
+        }
+        _pairs_cache["fetched_at"] = now
+    return _pairs_cache["pairs"]
 
 
 def get_current_user(

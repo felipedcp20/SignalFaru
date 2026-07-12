@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
-from app.dependencies import get_binance_client
+from app.dependencies import get_binance_client, binance_http_error
 from app.config import settings
 
 router = APIRouter(prefix="/account", tags=["Account"])

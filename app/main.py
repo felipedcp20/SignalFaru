@@ -2,7 +2,6 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base, SessionLocal
 from app.dependencies import get_current_user
@@ -60,13 +59,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Nota: no se configura CORS a propósito — el frontend se sirve desde este mismo
+# servidor (mismo origen), así que ningún origen externo necesita acceso a la API.
 
 # Auth router is public (no token required)
 app.include_router(auth.router)
