@@ -37,6 +37,26 @@ La aplicación combina un backend FastAPI, una base SQLite persistente, un sched
 
 <img src="assets/Login.png" alt="Pantalla de login de SignalFaru" width="320" />
 
+### Dashboard
+
+<img src="assets/dashboard.png" alt="Dashboard de SignalFaru con BTC, saldo, señales y órdenes" width="800" />
+
+### Señales del mercado
+
+<img src="assets/senales.png" alt="Señales del mercado: Top 10 y período de gracia" width="800" />
+
+### Operar
+
+<img src="assets/operar.png" alt="Pantalla de operación con precio, historial y órdenes OCO" width="800" />
+
+### Órdenes abiertas
+
+<img src="assets/ordenes.png" alt="Listado de órdenes abiertas" width="800" />
+
+### Portafolio
+
+<img src="assets/portafolio.png" alt="Distribución del portafolio en USDT" width="800" />
+
 ## Stack
 
 ### Backend
