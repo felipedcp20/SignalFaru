@@ -33,13 +33,9 @@ La aplicación combina un backend FastAPI, una base SQLite persistente, un sched
 
 ## Capturas
 
-### Login
+### Login y Dashboard
 
-<img src="assets/Login.png" alt="Pantalla de login de SignalFaru" width="320" />
-
-### Dashboard
-
-<img src="assets/dashboard.png" alt="Dashboard de SignalFaru con BTC, saldo, señales y órdenes" width="320" />
+<img src="assets/Login.png" alt="Pantalla de login de SignalFaru" width="320" />&nbsp;&nbsp;<img src="assets/dashboard.png" alt="Dashboard de SignalFaru con BTC, saldo, señales y órdenes" width="320" />
 
 ### Señales del mercado
 
